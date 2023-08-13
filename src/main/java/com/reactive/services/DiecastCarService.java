@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 /**
  * @author u2cc
  */
@@ -26,4 +28,6 @@ public class DiecastCarService {
     }
 
     public Mono<User> getUserWithRoles(String username) {return userRepository.findByUsername(username);}
+
+    public Flux<DiecastCar> findDiecastCarsByBrands(List<String> brands) {return diecastCarRepository.findCarByBrandList(brands);}
 }
