@@ -16,7 +16,7 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(
-                (authorize) -> authorize.pathMatchers("/reactive/**").permitAll()
+                (authorize) -> authorize.pathMatchers("/**").permitAll()
         );
         return http.build();
     }
