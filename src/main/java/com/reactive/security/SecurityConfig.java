@@ -15,7 +15,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http.authorizeExchange(
+        http.cors(ServerHttpSecurity.CorsSpec::disable).csrf(ServerHttpSecurity.CsrfSpec::disable).authorizeExchange(
                 (authorize) -> authorize.pathMatchers("/**").permitAll()
         );
         return http.build();

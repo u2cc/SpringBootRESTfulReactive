@@ -1,15 +1,20 @@
 package com.reactive.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -17,25 +22,26 @@ import java.util.*;
  */
 
 
-@Entity
-@Table(name="users")
+
+@Table("users")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="id")
+    @Column("id")
     private Long id;
     private String username;
     private String password;
     private String fullname;
 
-    @CreationTimestamp
-    private Timestamp created_at;
+    @CreatedDate
+    private ZonedDateTime created_at;
 
-    @UpdateTimestamp
-    private Timestamp modified_at;
+    @LastModifiedDate
+    private ZonedDateTime modified_at;
 
     @Transient
     private boolean enabled = true;
@@ -69,19 +75,13 @@ public class User implements UserDetails {
         return enabled;
     }
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "user_role_mapping",
-            joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") },
-            inverseJoinColumns = { @JoinColumn(name = "role_id", table = "roles", referencedColumnName = "id") }
-    )
-    Set<Role> roles = new HashSet<>();
+    List<Role> roles = new ArrayList<>();
 
     public void addRole(Role role) {
         this.roles.add(role);
     }
 
-    public Set<Role> getRoles() {
+    public List<Role> getRoles() {
         return roles;
     }
 
