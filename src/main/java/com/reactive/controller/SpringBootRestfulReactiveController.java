@@ -2,6 +2,7 @@ package com.reactive.controller;
 
 import com.reactive.entities.DiecastCar;
 import com.reactive.entities.User;
+import com.reactive.exception.IllegalRequestException;
 import com.reactive.services.DiecastCarService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,4 +41,15 @@ public class SpringBootRestfulReactiveController {
         return diecastCarService.findDiecastCarsByBrands(brands);
     }
 
+    @PostMapping(path="/addDiecastCar")
+    public Mono<String> addDiecastCar(@RequestBody DiecastCar diecastCar){
+        if(null!=diecastCar.getId()){
+            return Mono.error(new IllegalRequestException());
+        }
+        return diecastCarService.addDieCastCar(diecastCar)
+                //.map(result -> ResponseEntity.ok("Transaction Completed"));
+                .map(result -> "Transaction Completed");
+                //.switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+        //return Mono.just("Transaction Completed.");
+    }
 }
