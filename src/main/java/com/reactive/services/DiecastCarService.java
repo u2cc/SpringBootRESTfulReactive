@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 /**
@@ -35,7 +37,9 @@ public class DiecastCarService {
     private static final String UPDATE = "U";
 
     public Flux<DiecastCar> list() {
-        return diecastCarRepository.findAll();
+        return diecastCarRepository.findAll()
+                .limitRate(2)
+                .delayElements(Duration.ofSeconds(2));
     }
 
     public Mono<User> getUserWithRoles(String username) {return userRepository.findByUsername(username);}

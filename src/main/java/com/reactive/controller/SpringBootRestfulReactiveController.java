@@ -5,6 +5,9 @@ import com.reactive.entities.User;
 import com.reactive.exception.IllegalRequestException;
 import com.reactive.services.DiecastCarService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/reactive")
+@SecurityScheme(name = "diecast-api", scheme = "Bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER, bearerFormat = "JWT")
 public class SpringBootRestfulReactiveController {
 
     @Autowired
