@@ -4,6 +4,8 @@ import com.reactive.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,8 +30,7 @@ import java.util.stream.Collectors;
 public class SecurityConfig {
     @Autowired
     UserRepository userRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http.cors(ServerHttpSecurity.CorsSpec::disable).csrf(ServerHttpSecurity.CsrfSpec::disable).authorizeExchange(
@@ -40,7 +41,6 @@ public class SecurityConfig {
 
     @Bean
     public ReactiveUserDetailsService userDetailsService() {
-
         return new ReactiveUserDetailsService() {
             @Override
             public Mono<UserDetails> findByUsername(String username) {
@@ -55,7 +55,7 @@ public class SecurityConfig {
 //                                .authorities(authorities) // Set authorities for the user
 //                                .build();
 //                         we do not need to add authorities here as we are doing so in User class itself by overriding getAuthorities
-                        return User.withUserDetails(user).passwordEncoder(passwordEncoder::encode).build();
+                        return User.withUserDetails(user).build();
                     }).switchIfEmpty(Mono.error(new UsernameNotFoundException("User not found: " + username)));
 
             }
@@ -64,7 +64,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public ReactiveAuthenticationManager authenticationManager(ReactiveUserDetailsService userDetailsService) {
+        UserDetailsRepositoryReactiveAuthenticationManager authenticationManager = new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
+        authenticationManager.setPasswordEncoder(customPasswordEncoder());
+        return authenticationManager;
+    }
+
+
+    @Bean
+    public PasswordEncoder customPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

@@ -3,6 +3,7 @@ package com.reactive.controller;
 import com.reactive.entities.DiecastCar;
 import com.reactive.entities.User;
 import com.reactive.exception.IllegalRequestException;
+import com.reactive.model.LoginDto;
 import com.reactive.services.DiecastCarService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -10,10 +11,15 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.security.Security;
 import java.util.List;
 
 /**
@@ -27,6 +33,8 @@ public class SpringBootRestfulReactiveController {
 
     @Autowired
     private DiecastCarService diecastCarService;
+    @Autowired
+    ReactiveAuthenticationManager authenticationManager;
 
     @GetMapping(value = "/getAllDiecastCars", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<DiecastCar> getAll() {
@@ -55,5 +63,17 @@ public class SpringBootRestfulReactiveController {
                 .map(result -> "Transaction Completed");
                 //.switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
         //return Mono.just("Transaction Completed.");
+    }
+
+    @PostMapping(path="/login")
+    public Mono<String> login(@RequestBody LoginDto loginDto) {
+        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword());
+        return authenticationManager.authenticate(authenticationToken).flatMap(authentication -> {
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return Mono.just("Login successful");
+        }).onErrorResume(Exception.class, e -> {
+            SecurityContextHolder.clearContext();
+            return Mono.just("Authentication failed: " + e.getMessage());
+        });
     }
 }
